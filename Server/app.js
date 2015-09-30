@@ -2,6 +2,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var jwt = require('jsonwebtoken');
+var path = require('path');
+var fs = require('fs');
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
+var uuid = require('node-uuid');
 
 var config = require('./config'); // Load the config
 var auth = require('./auth'); // Load some authentication middleware
@@ -10,7 +15,7 @@ var db = require('monk')(config.mongoUrl);
 var screenshots = db.get('screenshots');
 
 var app = express();
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || config.port;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -18,6 +23,23 @@ app.use(morgan('short'));
 
 app.get('/', function(req, res) {
 	res.send("Hello!");
+});
+
+app.get('/:uuid/:filename', function (req, res) {
+	var file = encodeURIComponent(req.params.filename);
+	screenshots.find({ origFilename: file, uid: req.params.uuid}, function(err, doc) {
+		if(err) {
+			res.json({ success: false, message: 'Unable to find image' });
+		}
+		else {
+			if(doc.length > 0) {
+				res.sendFile(path.join(__dirname, "uploads/") + doc[0].filename);
+			}
+			else {
+				res.sendFile(path.join(__dirname, "static/") + "notfound.png");
+			}
+		}
+	});
 });
 
 // API ROUTES //
@@ -51,8 +73,37 @@ apiRoutes.get('/screenshots', function(res, res) {
 	});
 });
 
-apiRoutes.post('/upload', function(req, res) {
+apiRoutes.post('/upload', multipartMiddleware, function(req, res) {
+	var uniqueId = uuid.v4();
+	var newFileName = uniqueId + "-" + req.files.screenFile.originalFilename;
 
+	var currentPath = req.files.screenFile.path;
+	var newPath = path.join(__dirname, "uploads/") + newFileName;
+
+	var is = fs.createReadStream(currentPath);
+	var os = fs.createWriteStream(newPath);
+
+	is.pipe(os);
+	is.on('end',function() {
+		// Delete the temp file
+	    fs.unlinkSync(currentPath);
+	});
+	
+	var newScreenshot = {
+		origFilename: req.files.screenFile.originalFilename,
+		filename: newFileName,
+		uid: uniqueId,
+		uploadDate: new Date()
+	}
+
+	screenshots.insert(newScreenshot, function(err, doc) {
+		if(err) {
+			res.json({ success: false, message: 'Failed to store screenshot'});
+		}
+		else {
+			res.json({ success: true, message: 'Uploaded file', url: "/" + uniqueId + "/" + req.files.screenFile.originalFilename});
+		}
+	});
 });
 
 // Middleware to check for a valid token

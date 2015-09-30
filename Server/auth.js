@@ -4,7 +4,7 @@ var config = require('./config');
 module.exports = {
 	// Middleware to check for a valid token
 	checkToken: function(req, res, next) {
-		var token = req.body.token || req.query.token;
+		var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
 		if (token) {
 		    jwt.verify(token, config.serverSecret, function(err, decoded) {      
