@@ -6,6 +6,9 @@ var jwt = require('jsonwebtoken');
 var config = require('./config'); // Load the config
 var auth = require('./auth'); // Load some authentication middleware
 
+var db = require('monk')(config.mongoUrl);
+var screenshots = db.get('screenshots');
+
 var app = express();
 var port = process.env.PORT || 8080;
 
@@ -38,7 +41,14 @@ apiRoutes.post('/auth', function(req, res) {
 });
 
 apiRoutes.get('/screenshots', function(res, res) {
-
+	screenshots.find({}, function (err, doc) {
+		if(err) {
+			console.log("[/upload] - ERROR: " + err);
+		}
+		else {
+			res.json(doc);
+		}
+	});
 });
 
 apiRoutes.post('/upload', function(req, res) {

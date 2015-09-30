@@ -1,3 +1,6 @@
+var jwt = require('jsonwebtoken');
+var config = require('./config');
+
 module.exports = {
 	// Middleware to check for a valid token
 	checkToken: function(req, res, next) {
