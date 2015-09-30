@@ -3,6 +3,8 @@ config.js
 
 # Ignore specific files
 .DS_Store
+Server/uploads/*
+!Server/uploads/example.png
 
 # Logs
 logs
