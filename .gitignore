@@ -1,3 +1,9 @@
+# Exclude config file
+config.js
+
+# Ignore specific files
+.DS_Store
+
 # Logs
 logs
 *.log

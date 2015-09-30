@@ -1,0 +1,28 @@
+{
+  "name": "cloudshot",
+  "version": "0.0.1",
+  "description": "Back-end code for the CloudShot client. It enables automatic uploading of screenshots and later viewing them",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonsmets/CloudShot/"
+  },
+  "keywords": [
+    "cloud",
+    "screenshot",
+    "shot",
+    "mac",
+    "osx"
+  ],
+  "author": "Ton Smets",
+  "license": "GPL v2.0",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "jsonwebtoken": "^5.0.5",
+    "morgan": "^1.6.1"
+  }
+}
