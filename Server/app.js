@@ -21,6 +21,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('short'));
 
+fs.open(path.join(__dirname, "uploads/"),'r',function(err,fd){
+    if (err && err.code=='ENOENT') { 
+	    fs.mkdirSync(path.join(__dirname, "uploads/"));
+	    console.log("Uploads folder created");
+	}
+    else {
+    	console.log("Uploads folder exists");
+    }
+});
+
 app.get('/', function(req, res) {
 	res.send("Hello!");
 });
@@ -37,6 +47,7 @@ app.get('/:uuid/:filename', function (req, res) {
 			}
 			else {
 				res.sendFile(path.join(__dirname, "static/") + "notfound.png");
+				res.status(404);
 			}
 		}
 	});
@@ -87,45 +98,28 @@ apiRoutes.post('/upload', multipartMiddleware, function(req, res) {
 	is.on('end',function() {
 		// Delete the temp file
 	    fs.unlinkSync(currentPath);
-	});
-	
-	var newScreenshot = {
-		origFilename: req.files.screenFile.originalFilename,
-		filename: newFileName,
-		uid: uniqueId,
-		uploadDate: new Date()
-	}
+	    var newScreenshot = {
+			origFilename: req.files.screenFile.originalFilename,
+			filename: newFileName,
+			uid: uniqueId,
+			uploadDate: new Date()
+		}
 
-	screenshots.insert(newScreenshot, function(err, doc) {
-		if(err) {
-			res.json({ success: false, message: 'Failed to store screenshot'});
-		}
-		else {
-			res.json({ success: true, message: 'Uploaded file', url: "/" + uniqueId + "/" + req.files.screenFile.originalFilename});
-		}
+		screenshots.insert(newScreenshot, function(err, doc) {
+			if(err) {
+				res.json({ success: false, message: 'Failed to store screenshot. Database error'});
+			}
+			else {
+				res.json({ success: true, message: 'Uploaded file', url: "/" + uniqueId + "/" + req.files.screenFile.originalFilename});
+			}
+		});
+	});
+
+	is.on('error', function(err) {
+		console.log("Error in file I/O: " + err);
+		res.json({ success: false, message: 'Failed to store screenshot. File I/O error'});
 	});
 });
-
-// Middleware to check for a valid token
-var checkToken = function(req, res, next) {
-	var token = req.body.token || req.query.token;
-
-	if (token) {
-	    jwt.verify(token, config.serverSecret, function(err, decoded) {      
-			if (err) {
-				return res.json({ success: false, message: 'Failed to authenticate token.' });    
-			} else {
-	        	req.decoded = decoded;    
-				next();
-			}
-	    });
-  	} else {
-    	return res.status(403).send({ 
-	        success: false, 
-	        message: 'No token provided.' 
-	    });
-	}
-}
 
 // Prefix all API routes with /api
 app.use('/api', apiRoutes);
