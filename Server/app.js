@@ -115,6 +115,7 @@ apiRoutes.post('/upload', multipartMiddleware, function(req, res) {
 	}
 	else {
 		res.json({ success: false, message: 'Unsupported file format'});
+		fs.unlinkSync(currentPath);
 	}
 
 	
