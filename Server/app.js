@@ -33,6 +33,19 @@ fs.open(path.join(__dirname, "uploads/"),'r',function(err,fd){
 	}
 });
 
+var databaseTest = screenshots.find({});
+
+databaseTest.on('complete', function(err, doc) {
+	if(err) {
+		console.log("Database connection failed on: " + config.mongoUrl);
+		console.log("Quitting...")
+		process.exit(1);
+	}
+	else {
+		console.log("Database is connected on: " + config.mongoUrl);
+	}
+});
+
 // API ROUTES //
 var apiRoutes = express.Router(); 
 
@@ -56,7 +69,7 @@ apiRoutes.post('/auth', function(req, res) {
 apiRoutes.get('/screenshots', function(res, res) {
 	screenshots.find({}, function (err, doc) {
 		if(err) {
-			console.log("[/upload] - ERROR: " + err);
+			console.log("[/screenshots] - ERROR: " + err);
 		}
 		else {
 			var tmpArr = [];
@@ -101,6 +114,7 @@ apiRoutes.post('/upload', multipartMiddleware, function(req, res) {
 			screenshots.insert(newScreenshot, function(err, doc) {
 				if(err) {
 					res.json({ success: false, message: 'Failed to store screenshot. Database error'});
+					console.log("[/upload] - ERROR: " + err);
 				}
 				else {
 					res.json({ success: true, message: 'Uploaded file', url: "/" + uniqueId + "/" + req.files.screenFile.originalFilename});
