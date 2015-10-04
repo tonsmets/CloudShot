@@ -33,7 +33,12 @@ def getScreenshotList():
 		getToken()
 	headers = {'x-access-token': clientToken}
 	r = requests.get(serverUrl + "/api/screenshots", headers=headers)
-	screenList = r.json()
+	response = r.json()
+	if response['success'] == True:
+		screenList = response['data']
+	else:
+		getToken()
+		getScreenshotList()
 	logging.info("Refreshed screenList")
 
 def postScreenshot(screenPath):
@@ -43,12 +48,15 @@ def postScreenshot(screenPath):
 	headers = {'x-access-token': clientToken}
 	r = requests.post(serverUrl + "/api/upload", files=files, headers=headers)
 	response = r.json()
-	if(response['success'] == True):
+	if response['success'] == True:
 		logging.info("Uploaded file: %s", screenPath)
 		logging.info("Image URL: %s", serverUrl + urllib.parse.quote(response['url']))
 		spam = pyperclip.copy(serverUrl + urllib.parse.quote(response['url']))
 		logging.info("Copied URL to clipboard!")
 		getScreenshotList()
+	else:
+		getToken()
+		postScreenshot(screenPath)
 
 class CloudHandler(LoggingEventHandler):
 	def __init__(self):

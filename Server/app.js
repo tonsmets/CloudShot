@@ -81,7 +81,7 @@ apiRoutes.get('/screenshots', function(res, res) {
 				tmpObj.filename = doc[i].origFilename;
 				tmpArr.push(tmpObj);
 			}
-			res.json(tmpArr);
+			res.json({ success: true, data: tmpArr});
 		}
 	});
 });
