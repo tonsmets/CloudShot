@@ -144,13 +144,22 @@ app.get('/', function(req, res) {
 
 app.get('/:uuid/:filename', function (req, res) {
 	var file = encodeURIComponent(req.params.filename);
-	screenshots.find({ origFilename: file, uid: req.params.uuid}, function(err, doc) {
+	screenshots.find({ uid: req.params.uuid}, function(err, doc) {
 		if(err) {
-			res.json({ success: false, message: 'Unable to find image' });
+			res.sendFile(path.join(__dirname, "static/") + "notfound.png");
+			res.status(404);
 		}
 		else {
 			if(doc.length > 0) {
-				res.sendFile(path.join(__dirname, "uploads/") + doc[0].filename);
+				var filename = path.join(__dirname, "uploads/") + doc[0].filename;
+				fs.exists(filename, function(exists) {
+					if (exists) {
+						res.sendFile(filename);
+					} else {
+						res.sendFile(path.join(__dirname, "static/") + "notfound.png");
+						res.status(404);
+					}
+				});
 			}
 			else {
 				res.sendFile(path.join(__dirname, "static/") + "notfound.png");
