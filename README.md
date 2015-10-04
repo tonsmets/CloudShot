@@ -15,11 +15,18 @@ This project is made with Node.js and uses a MongoDB database. There are also so
   }
 ```
 
+For the Python daemon I used: https://github.com/serverdensity/python-daemon
+
 ## Status
 This project is still a Work-In-Progress
 
+###To-Do's
+[ ] Check if all screenshots are uploaded on a timed interval (and upload them if not)
+[ ] Check if there is a server connection, else add the screenshots to a queue
+[ ] Write .plist file to make the Python daemon start on boot
+
 ## Introduction
-Okay, to be clear: I wrote this software just because I needed a simple way to share screenshots. Currently it is only the back-end with a very simple API that's done. I'll write a client as soon as I can.
+Okay, to be clear: I wrote this software just because I needed a simple way to share screenshots. The back-end is currently done and I'm busy writing the client. The client will be a daemon that runs in te background. When you take a screenshot, it uploads it to the server and then copies the URL to your clipboard.
 
 ## Installation
 

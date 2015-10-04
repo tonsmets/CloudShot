@@ -8,6 +8,7 @@ import pyperclip
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 import config
+import threading
 
 clientKey = config.clientKey
 screenPath = config.screenPath
@@ -66,7 +67,10 @@ class CloudHandler(LoggingEventHandler):
 	# from it's temporary path to the final destination
 	def on_moved(self, event):
 		super(LoggingEventHandler, self).on_moved(event)
-		postScreenshot(event.dest_path)
+		# Execute the uploading on a seperate thread to keep the events coming in
+		t = threading.Thread(target=postScreenshot,name="Upload screenshot",args=(event.dest_path,))
+		t.daemon = True
+		t.start()
 
 	def on_created(self, event):
 		super(LoggingEventHandler, self).on_created(event)
@@ -78,18 +82,18 @@ class CloudHandler(LoggingEventHandler):
 		super(LoggingEventHandler, self).on_modified(event)
 
 
-if __name__ == "__main__":
+def runMain():
 	getToken()
 	logging.basicConfig(level=logging.INFO,
 						format='%(asctime)s - %(message)s',
 						datefmt='%Y-%m-%d %H:%M:%S')
 	event_handler = CloudHandler()
 	observer = Observer()
-	observer.schedule(event_handler, screenPath, recursive=True)
+	observer.schedule(event_handler, screenPath, recursive=False)
 	observer.start()
 	getScreenshotList()
 	interval = 60 #seconds
-	interval = interval * 2
+	interval = interval * 1
 	counter = 0
 	try:
 		while True:
@@ -97,7 +101,7 @@ if __name__ == "__main__":
 				getScreenshotList()
 				counter = 0
 			counter += 1
-			time.sleep(0.5)
+			time.sleep(1)
 	except KeyboardInterrupt:
 		observer.stop()
 	observer.join()
