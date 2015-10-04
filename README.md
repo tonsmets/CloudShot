@@ -24,6 +24,7 @@ This project is still a Work-In-Progress
 - [ ] Check if all screenshots are uploaded on a timed interval (and upload them if not)
 - [ ] Check if there is a server connection, else add the screenshots to a queue
 - [ ] Write .plist file to make the Python daemon start on boot
+- [ ] Think about chaging the watchdog approach with a timed interval check
 
 ## Introduction
 Okay, to be clear: I wrote this software just because I needed a simple way to share screenshots. The back-end is currently done and I'm busy writing the client. The client will be a daemon that runs in te background. When you take a screenshot, it uploads it to the server and then copies the URL to your clipboard.
