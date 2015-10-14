@@ -86,7 +86,7 @@ apiRoutes.get('/screenshots', function(res, res) {
 	});
 });
 
-apiRoutes.post('/upload', multipartMiddleware, function(req, res) {
+apiRoutes.post('/upload', multipart({maxFilesSize:5 * 1024 * 1024 }), function(req, res) {
 	var buffer = readChunk.sync(req.files.screenFile.path, 0, 12);
 	var type = imageType(buffer);
 
