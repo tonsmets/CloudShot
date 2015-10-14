@@ -65,6 +65,7 @@ def postScreenshot(screenPath):
 	try:
 		headers = {'x-access-token': clientToken}
 		r = requests.post(serverUrl + "/api/upload", files=files, headers=headers)
+		print(r)
 		response = r.json()
 		if response['success'] == True:
 			logging.info("Uploaded file: %s", screenPath)

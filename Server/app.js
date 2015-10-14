@@ -22,6 +22,7 @@ var port = process.env.PORT || config.port;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('short'));
+app.use(multipart({maxFieldsSize: '5mb'}));
 
 fs.open(path.join(__dirname, "uploads/"),'r',function(err,fd){
 	if (err && err.code=='ENOENT') { 
